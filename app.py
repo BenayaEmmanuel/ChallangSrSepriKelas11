@@ -81,4 +81,34 @@ def edit_guru(id):
         nama = request.form['nama']
         email = request.form['email']
         mata_pelajaran = request.form['mata_pelajaran']
-        cursor.execute("UPDATE guru SET nama = %s, email = %s, mata_p
+                   cursor.execute("UPDATE guru SET nama = %s, email = %s, mata_pelajaran = %s WHERE id = %s", 
+                          (nama, email, mata_pelajaran, id))
+           conn.commit()
+           cursor.close()
+           conn.close()
+           return redirect(url_for('dashboard'))
+
+       cursor.execute("SELECT * FROM guru WHERE id = %s", (id,))
+       guru = cursor.fetchone()
+       cursor.close()
+       conn.close()
+
+       return render_template('edit_guru.html', guru=guru)
+
+   @app.route('/delete_guru/<int:id>', methods=['POST'])
+   def delete_guru(id):
+       conn = get_db_connection()
+       cursor = conn.cursor()
+       cursor.execute("DELETE FROM guru WHERE id = %s", (id,))
+       conn.commit()
+       cursor.close()
+       conn.close()
+       return redirect(url_for('dashboard'))
+
+   @app.route('/logout')
+   def logout():
+       session.pop('user_id', None)
+       return redirect(url_for('home'))
+
+   if __name__ == '__main__':
+       app.run(debug=True)
