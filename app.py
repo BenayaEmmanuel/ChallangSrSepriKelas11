@@ -1,11 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import mysql.connector
-from config import Config
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
-app.config.from_object(Config)
+
+# Konfigurasi database
+app.config['MYSQL_HOST'] = 'localhost'  # Ganti dengan host database Anda
+app.config['MYSQL_USER'] = 'root'       # Ganti dengan username database Anda
+app.config['MYSQL_PASSWORD'] = ''        # Ganti dengan password database Anda
+app.config['MYSQL_DB'] = 'sekolah'      # Ganti dengan nama database Anda
 
 # Koneksi ke database
 def get_db_connection():
@@ -81,34 +85,34 @@ def edit_guru(id):
         nama = request.form['nama']
         email = request.form['email']
         mata_pelajaran = request.form['mata_pelajaran']
-                   cursor.execute("UPDATE guru SET nama = %s, email = %s, mata_pelajaran = %s WHERE id = %s", 
-                          (nama, email, mata_pelajaran, id))
-           conn.commit()
-           cursor.close()
-           conn.close()
-           return redirect(url_for('dashboard'))
+        cursor.execute("UPDATE guru SET nama = %s, email = %s, mata_pelajaran = %s WHERE id = %s", 
+                       (nama, email, mata_pelajaran, id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return redirect(url_for('dashboard'))
 
-       cursor.execute("SELECT * FROM guru WHERE id = %s", (id,))
-       guru = cursor.fetchone()
-       cursor.close()
-       conn.close()
+    cursor.execute("SELECT * FROM guru WHERE id = %s", (id,))
+    guru = cursor.fetchone()
+    cursor.close()
+    conn.close()
 
-       return render_template('edit_guru.html', guru=guru)
+    return render_template('edit_guru.html', guru=guru)
 
-   @app.route('/delete_guru/<int:id>', methods=['POST'])
-   def delete_guru(id):
-       conn = get_db_connection()
-       cursor = conn.cursor()
-       cursor.execute("DELETE FROM guru WHERE id = %s", (id,))
-       conn.commit()
-       cursor.close()
-       conn.close()
-       return redirect(url_for('dashboard'))
+@app.route('/delete_guru/<int:id>', methods=['POST'])
+def delete_guru(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM guru WHERE id = %s", (id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('dashboard'))
 
-   @app.route('/logout')
-   def logout():
-       session.pop('user_id', None)
-       return redirect(url_for('home'))
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    return redirect(url_for('home'))
 
-   if __name__ == '__main__':
-       app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
